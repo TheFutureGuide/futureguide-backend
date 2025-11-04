@@ -15,10 +15,10 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //  MySQL Connection
 const db = mysql.createConnection({
-  host: "localhost",
+  host: "mysql.railway.internal",
   user: "root",
-  password: "om7319km", 
-  database: "futureguide",         
+  password: "G3ozx5xtEqGAGi3VdsQGKGHxuwqSJDTn38vEUEREQweQ", 
+  database: "railway",         
 });
 
 db.connect((err) => {
