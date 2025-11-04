@@ -19,15 +19,17 @@ app.use(cors({
 
 //  MySQL Connection
 const db = mysql.createPool({
-  host: process.env.DB_HOST || "ballast.proxy.rlwy.net",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "G3ozx5xtEqGAGi3VdsQGKGHxuwqSJDTn38vEUEREQweQ",
-  database: process.env.DB_NAME || "railway",
-  port: process.env.DB_PORT || 55091,
+  host: "ballast.proxy.rlwy.net",
+  user: "root",
+  password: "VsSEwaZbSzgTeMktXoZAEMDDPWmEoVoa",
+  database: "railway",
+  port: 55091,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
+
+
       // ✅ Test database connection route
 app.get("/test-db", (req, res) => {
   db.query("SELECT 1 + 1 AS result", (err, results) => {
