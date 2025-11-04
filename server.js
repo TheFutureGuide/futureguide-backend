@@ -18,13 +18,18 @@ app.use(cors({
 
 
 //  MySQL Connection
-const db = mysql.createConnection({
-  host: "mysql.railway.internal",
-  user: "root",
-  password: "G3ozx5xtEqGAGi3VdsQGKGHxuwqSJDTn38vEUEREQweQ", 
-  database: "railway",
-  port:3306,         
+const db = mysql.createPool({
+  host: process.env.DB_HOST || "mysql.railway.internal",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "G3ozx5xtEqGAGi3VdsQGKGHxuwqSJDTn38vEUEREQweQ",
+  database: process.env.DB_NAME || "railway",
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
+        
+
 
 db.connect((err) => {
   if (err) {
@@ -34,23 +39,7 @@ db.connect((err) => {
   }
 });
 
-// Nodemailer setup (use your Gmail + App Password)
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "thefutureguide7@gmail.com", 
-    pass: "pbfw jtgd gccv lugb",   
-  },
-});
 
-//  Verify mail transporter
-transporter.verify((error, success) => {
-  if (error) {
-    console.error(" Error connecting to email service:", error);
-  } else {
-    console.log(" Server is ready to take our messages");
-  }
-});
 
 // ====================== SIGNUP ======================
 
@@ -59,49 +48,29 @@ app.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-    db.query(sql, [username, email, hashedPassword], async (err, result) => {
+    db.query(sql, [username, email, hashedPassword], (err, result) => {
       if (err) {
         console.error("❌ Error inserting user:", err);
         return res.status(500).json({ message: "Error inserting user!" });
       }
-
-      // ✅ Define transporter (configure your Gmail & App Password)
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: "thefutureguide7@gmail.com",
-          pass: "pbfw jtgd gccv lugb", 
-        },
-      });
-
-      // ✅ Define mailOptions before using it
-      const mailOptions = {
-        from: "thefutureguide7@gmail.com",
-        to: email,
-        subject: "Welcome to FutureGuide!",
-        text: `Hello ${username},\n\nWelcome to The Future Guide! Your account has been created successfully.\n\nEnjoy Exploring!\n\n-The Future Guide Team`,
-      };
-
-      // ✅ Send email after signup success
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error("❌ Error sending email:", error);
-          return res.status(500).json({ message: "User registered." });
-        } else {
-          console.log("📧 Email sent:", info.response);
-          res.status(200).json({ message: "User registered!" });
-        }
-      });
+      console.log("✅ New user registered:", username);
+      res.status(200).json({ message: "User registered successfully!" });
     });
   } catch (error) {
-    console.error("❌ Server error:", error);
+    console.error("❌ Hashing error:", error);
     res.status(500).json({ message: "Server error during signup!" });
   }
 });
+
+
+    
+
+ 
+    
+
 
   
 
@@ -186,4 +155,13 @@ function sendBulkEmails(recipients) {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
+});
+app.get("/test-db", (req, res) => {
+  db.query("SELECT 1 + 1 AS result", (err, results) => {
+    if (err) {
+      console.error("❌ Database test failed:", err);
+      return res.status(500).send("DB connection failed");
+    }
+    res.send("✅ Database connected successfully!");
+  });
 });
