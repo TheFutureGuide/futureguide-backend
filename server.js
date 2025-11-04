@@ -12,7 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors({
-  origin: "https://thefutureguide.github.io/main/",  // your GitHub Pages domain
+  origin: "https://thefutureguide.github.io",  // your GitHub Pages domain
   methods: ["GET", "POST"],
 }));
 
